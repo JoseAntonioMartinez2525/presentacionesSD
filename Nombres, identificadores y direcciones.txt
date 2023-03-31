@@ -1,0 +1,79 @@
+5.1 NOMBRES, IDENTIFICADORES Y DIRECCIONES
+Comencemos por dar un vistazo a lo que actualmente es un nombre. Un nombre —dentro de un sistema distribuido— es una cadena de bits o caracteres utilizados para hacer referencia a una entidad.
+En un sistema distribuido, una entidad puede ser prácticamente cualquier cosa. Ejemplos clásicos
+incluyen recursos tales como servidores, impresoras, discos y archivos. Otros ejemplos muy conocidos de entidades que a menudo se nombran de manera explícita son los procesos, usuarios, buzones
+de correo, grupos de noticias, páginas web, ventanas gráficas, mensajes, conexiones de red y muchas cosas más.
+Las entidades se pueden operar. Por ejemplo, un recurso tal como una impresora ofrece una
+interfaz que contiene operaciones para imprimir un documento, solicitar el estado de una tarea de
+impresión y cosas similares. Además, una entidad tal como una conexión de red puede proporcionar operaciones para enviar y recibir datos, establecer parámetros de calidad de servicio, solicitar
+el estado y así sucesivamente.
+Para operar una entidad, es necesario acceder a ella, de modo que se requiere tener un punto de
+acceso. Un punto de acceso es otra clase, pero especial, de entidad en un sistema distribuido. Al
+nombre de un punto de acceso se le llama dirección. A la dirección del punto de acceso de una entidad se le denomina dirección de dicha entidad.
+Una entidad puede ofrecer más de un punto de acceso. Como comparación, un teléfono puede
+verse como un punto de acceso a una persona, en donde el número telefónico corresponde a una dirección. De hecho, en la actualidad mucha gente tiene distintos números de teléfono, y cada número
+corresponde a un punto en donde se le puede localizar. En un sistema distribuido, un ejemplo típico
+de un punto de acceso es un servidor que ejecuta un servidor específico, en el cual la dirección está
+formada por, digamos, una dirección IP y un número de puerto (es decir, la dirección del servidor
+a nivel de transporte).
+Una entidad puede modificar sus puntos de acceso en el curso del tiempo. Por ejemplo, cuando
+una computadora móvil se mueve a una ubicación diferente, con frecuencia se le asigna una IP distinta a la que tenía antes. De manera similar, cuando una persona se traslada a otra ciudad u otro país, a
+menudo es necesario modificar también sus números telefónicos. De igual modo, cambiar de empleo
+o de proveedor de servicios de internet significa modificar nuestra dirección de correo electrónico.
+Entonces, una dirección es sólo una clase especial de nombre: hace referencia a un punto de
+acceso de una entidad. Debido a que un punto de acceso está íntimamente asociado con una entidad, parecería conveniente utilizar la dirección de un punto de acceso como nombre regular de la
+entidad asociada. Sin embargo, esto difícilmente se lleva a cabo dado que la nomenclatura es, por
+lo general, muy inflexible y a menudo nada amigable con el usuario.
+180 CAPÍTULO 5 NOMBRES
+SECCIÓN 5.1 NOMBRES, IDENTIFICADORES Y DIRECCIONES 181
+Por ejemplo, no es poco común reorganizar un sistema distribuido con regularidad, de manera
+que un servidor específico pueda ejecutarse entonces en un servidor diferente al previo. La máquina anterior sobre la cual solía ejecutarse se puede reasignar a un servidor completamente diferente.
+En otras palabras, una entidad puede modificar fácilmente un punto de acceso, o un punto de acceso puede reasignarse a una entidad diferente. Si una dirección se utiliza para hacer referencia a una
+entidad, tendremos una referencia inválida en el instante en que el punto de acceso cambie o sea
+reasignado a otra entidad. Por tanto, es mucho mejor dejar que un servicio sea conocido por un
+nombre separado independientemente de la dirección del servidor asociado.
+De modo similar, si una entidad ofrece más de un punto de acceso, no queda claro cuál dirección utilizar como referencia. Por ejemplo, muchas organizaciones distribuyen su servicio web a
+través de muchos servidores. Si utilizamos las direcciones asignadas a dichos servidores como
+referencia para un servicio web, no resulta evidente qué dirección se debe elegir como la mejor.
+De nuevo, una mucho mejor solución es la de tener un solo nombre para el servicio web independientemente de las direcciones de los diferentes servidores web.
+Estos ejemplos ilustran que un nombre para una entidad que es independiente de sus direcciones
+con frecuencia es más fácil y más flexible de usar. A dicho nombre se le conoce como independiente
+de su ubicación.
+Además de la dirección, existen otros tipos de nombres que merecen un trato especial, tales
+como los nombres empleados para identificar de manera única a una entidad. Un identificador
+verdadero es un nombre que tiene las propiedades siguientes (Wieringa y de Jonge, 1995):
+1. Un identificador hace referencia a una entidad como máximo.
+2. Cada entidad es referida por al menos un identificador.
+3. Un identificador siempre hace referencia a la misma entidad (es decir, nunca se reutiliza).
+Mediante el uso de identificadores se vuelve más fácil hacer referencia clara a una entidad. Por
+ejemplo, asumamos que dos procesos hacen referencia a una entidad por medio de un identificador.
+Para verificar si los procesos hacen referencia a la misma entidad, es suficiente con verificar que
+los dos identificadores sean iguales. Dicha prueba no es suficiente si los dos procesos utilizan nombres regulares, no únicos, y no identificables. Por ejemplo, el nombre “Juan Pérez” no se puede tomar como una referencia única para una sola persona.
+De manera similar, si se puede reasignar una dirección a una entidad diferente, no podemos utilizar una dirección como un identificador. Consideremos el uso de números telefónicos, los cuales
+son razonablemente estables en el sentido de que un número telefónico hace referencia durante cierto tiempo a la misma persona o empresa. Sin embargo, usar un número telefónico como identificador no funcionará, ya que puede ser reasignado en el curso del tiempo. En consecuencia, la
+pastelería de Bob pudiera recibir llamadas telefónicas para la tienda de antigüedades de Alicia durante un largo periodo. En este caso, hubiera sido mejor utilizar un identificador verdadero para Alicia en lugar de su número telefónico.
+Las direcciones y los identificadores son dos importantes tipos de nombres empleados cada uno
+con propósitos muy diferentes. En muchos sistemas de cómputo, las direcciones y los identificadores se representan usando solamente formas legibles para la máquina, esto es, en forma de cadenas
+de bits. Por ejemplo, una dirección ethernet es, en esencia, una cadena aleatoria de 48 bits. De manera similar, las direcciones de memoria se representan por lo general como cadenas de 32 o 64 bits.
+Otro tipo importante de nombre es el destinado a utilizarse por las personas, también llamado
+nombre amigable para el usuario. Al contrario de las direcciones y los identificadores, un nombre
+amigable para el usuario por lo general, se representa como una cadena de caracteres. Estos nombres aparecen de muchas formas diferentes. Por ejemplo, en los sistemas UNIX los archivos tienen
+cadenas de caracteres como nombres que pueden tener una longitud de hasta 255 caracteres, y los
+cuales son definidos completamente por el usuario. De manera similar, los nombres DNS están representados como sencillas cadenas de caracteres sensibles a mayúsculas y minúsculas.
+Tener nombres, identificadores, y direcciones nos da el tema central del presente capítulo, ¿cómo
+resolver nombres e identificadores de direcciones? Antes de abordar distintas soluciones, es importante darnos cuenta de que existe a menudo una relación cercana entre la resolución de nombres en
+los sistemas distribuidos y el ruteo de mensajes. En principio, un sistema de nombres mantiene un
+vínculo nombre a dirección el cual es, en su forma más simple, solamente una tabla (nombre, dirección) de pares. Sin embargo, en sistemas distribuidos que se expanden en grandes redes y para
+las cuales se requieren muchos recursos, una tabla centralizada no funcionará.
+Al contrario, sucede con frecuencia que el nombre se descompone en muchas partes tales como ftp.cs.vu.nl, y dicha resolución de nombres tiene lugar a través de una búsqueda recursiva de dichas partes. Por ejemplo, un cliente que requiere saber la dirección del servidor FTP relacionado
+con ftp.cs.vu.nl primero resolverá nl para encontrar al servidor NS(nl) responsable de los nombres
+que terminan con nl, después de lo cual se pasa el resto del nombre al servidor NS(nl). Entonces,
+este servidor puede resolver el nombre vu en el servidor NS(vu.nl) responsable de los nombres que
+terminan con vu.nl los cuales pueden manipular el resto del nombre ftp.cs. En algún punto, esto provoca el ruteo de la resolución de nombres como:
+Ns(.) → NS(nl) → NS(vu.nl) → dirección de ftp.cs.vu.nl
+donde NS(.) representa al servidor que puede devolver la dirección de NS(nl), también conocido como servidor raíz. NS(vu.nl) devolverá la dirección actual del servidor FTP. Es interesante advertir
+que los límites entre la resolución de nombres y el ruteo de mensajes comienzan a desvanecerse.
+En las siguientes secciones consideraremos tres clases diferentes de sistemas de nombres. Primero, daremos un vistazo a la manera en que los identificadores se pueden resolver para las direcciones. En este caso, veremos también un ejemplo en donde no es posible distinguir la resolución
+de nombres del ruteo de mensajes. Después de eso, consideraremos los nombres amigables para el
+usuario y los nombres descriptivos (es decir, entidades que se describen mediante una colección de
+nombres)
