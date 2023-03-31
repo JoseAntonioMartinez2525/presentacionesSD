@@ -1,0 +1,279 @@
+NOMBRES PLANOS
+Líneas arriba explicamos que los identificadores son convenientes para representar a las entidades de manera única. En muchos casos, los identificadores son simplemente cadenas aleatorias de bits, a las cuales nos referimos convenientemente como nombres no estructurados o planos. Una propiedad importante de tales nombres es que no contienen información alguna con respecto a la ubicación
+del punto de acceso de su entidad asociada. A continuación, daremos un vistazo a la forma en que
+se pueden resolver los nombres, o, de manera equivalente, cómo podemos localizar una entidad
+cuando solamente proporcionamos su identificador Soluciones simples
+Consideremos primero dos soluciones sencillas para localizar una entidad. Ambas soluciones son
+aplicables solamente para redes de área local. Sin embargo, en dicho ambiente, por lo general hacen bien el trabajo, y vuelven particularmente atractiva su simplicidad.
+Transmisión y multitransmisión
+Considere un sistema distribuido construido sobre una red de computadoras que ofrece capacidades
+eficientes para la transmisión. Por lo general, dichas capacidades se ofrecen mediante redes de área
+local en las cuales todas las máquinas están conectadas a un solo cable o a su equivalente lógico.
+Además, las redes inalámbricas de área local entran en esta categoría.
+Localizar una entidad en dicho ambiente es sencillo: un mensaje que contiene al identificador
+de la entidad es transmitido a cada máquina y a cada máquina se le solicita verificar si tiene una entidad. Solamente las máquinas que pueden ofrecer un punto de acceso para la entidad envían una
+respuesta que contiene la dirección de dicho punto de acceso.
+Este principio se utiliza en el Protocolo de Resolución de Direcciones (ARP, por sus siglas
+en inglés) en internet para encontrar la dirección de vínculo de datos de una máquina cuando solamente se tiene la dirección IP (Plummer, 1982). En esencia, una máquina difunde un paquete en
+la red local que pregunta quien es el propietario de una dirección IP dada. Cuando el mensaje llega
+a la máquina, el receptor verifica si debiera poner atención a la petición de dirección IP. Si es así,
+envía un paquete de respuesta que contiene, por ejemplo, su dirección ethernet.
+La transmisión se torna ineficiente al crecer la red. No solamente se desperdicia el ancho de
+banda en los mensajes de petición, más aún, y más seriamente, demasiados servidores pueden ser
+interrumpidos por peticiones que no pueden responder. Una posible solución es implementar una
+multitransmisión mediante la cual solamente un grupo restringido de servidores reciba la petición.
+Por ejemplo, las redes ethernet soportan multitransmisión al nivel de enlace de datos de manera directa con el hardware.
+También es posible utilizar la multidifusión para localizar entidades dentro de redes punto a
+punto. Por ejemplo, internet soporta multitransmisión a nivel de red al permitir a los servidores
+conectarse a un grupo específico de multitransmisión. Dichos grupos se identifican mediante una
+dirección de multitransmisión. Cuando un servidor envía un mensaje a una dirección de multitransmisión, la capa de red proporciona un servicio del mejor esfuerzo para enviar dicho mensaje a todos
+los miembros del grupo. En Deering y Cheriton (1990) y Deering y colaboradores (1996) podrá encontrar información relacionada con implementaciones eficientes para multitransmisión en internet.
+Podemos utilizar una dirección de multitransmisión como un servicio general de localización
+para múltiples entidades. Por ejemplo, considere una empresa en donde cada empleado tiene su propia computadora móvil. Cuando tal computadora se conecta a una red local disponible, se le
+asigna una dirección IP de manera automática. Además, se conecta a un grupo específico de multitransmisión. Cuando un proceso desea localizar a la computadora A, envía una petición “¿En dónde está A?” al grupo de multitransmisión. Si A está conectada, responde con su dirección IP actual.
+Otra manera de utilizar la dirección de multitransmisión es asociarla con una entidad replicada
+y utilizar la multitransmisión para localizar la réplica más cercana. Al enviar una petición a la dirección de multitransmisión, cada réplica responde con su propia dirección IP actual (normal). Una
+manera ruda de seleccionar la réplica más cercana es elegir aquella cuya respuesta llegue antes. Explicaremos las demás formas de selección en capítulos posteriores. Como podemos ver, la selección
+de la réplica más cercana por lo general no es tan fácil.
+Apuntadores hacia adelante
+Otro método popular para localizar las entidades móviles es utilizar los apuntadores hacia adelante (Fowler, 1985). El principio es simple: cuando una entidad se mueve de A a B, deja en A
+una referencia de su nueva ubicación en B. La principal ventaja de este método es su simplicidad:
+tan pronto como una entidad es localizada, por ejemplo, mediante el uso del servicio de nombres
+tradicional, un cliente puede buscar la dirección actual siguiendo la cadena de apuntadores hacia
+adelante.
+También existe cierto número de desventajas. Primero, si no tomamos medidas especiales, para una entidad altamente móvil la cadena que lo localiza puede tornarse demasiado larga y prohibitivamente costosa. Segundo, todas las ubicaciones intermedias localizadas en una cadena tendrán
+que mantener su parte de la cadena de apuntadores hacia adelante mientras sea necesario. Una tercera (y relacionada) desventaja es la vulnerabilidad de los vínculos rotos. Tan pronto como se pierde
+un apuntador (por cualquier razón), no se puede llegar a la entidad. Por tanto, una cuestión importante es mantener las cadenas relativamente cortas, y asegurarse de que los apuntadores hacia
+adelante estén fortalecidos.
+Para comprender mejor cómo funcionan los apuntadores hacia adelante, consideremos su uso
+con respecto a los objetos remotos: objetos a los que se puede acceder por medio de una llamada a
+un procedimiento remoto. Si seguimos el método de cadenas SSP (Shapiro y cols., 1992), cada
+apuntador hacia adelante se implementa como un par (resguardo del cliente, resguardo del servidor), según ilustra la figura 5-1. (Vemos que en la terminología original de Shapiro, un resguardo
+del servidor se conoce como scion y produce pares (resguardo, scion), lo cual explica su nombre.)
+Un resguardo del servidor contiene ya sea una referencia local como el objeto real o la referencia
+local hacia un resguardo remoto del cliente para dicho objeto.
+Cada vez que un objeto se mueve desde el espacio de dirección A hacia B, deja atrás el resguardo del cliente en su lugar en A y coloca un resguardo del servidor que hace referencia a él
+en B. Un aspecto interesante de este método es que la migración resulta completamente transparente para el cliente. Lo único que el cliente ve de un objeto es el resguardo del cliente. Cómo,
+y hacia cuál ubicación envía dicho resguardo del cliente sus invocaciones, permanece oculto
+para el cliente. Además, observemos que este uso de los apuntadores hacia adelante no es como
+buscar una dirección. En vez de eso, una petición del cliente se reenvía junto con la cadena real
+del objeto Para acortar la cadena de pares (resguardo del cliente, resguardo del servidor), la invocación
+de un objeto acarrea la identificación del resguardo del cliente desde donde se inició dicha invocación. Una identificación del resguardo del cliente consta de la dirección a nivel de transporte del
+cliente, combinada con un número generado de manera local para identificar dicho resguardo.
+Cuando la invocación alcanza al objeto en su ubicación actual, se envía una respuesta de vuelta
+hacia el resguardo del cliente en donde se inició la invocación (con frecuencia sin regresar a la cadena). La ubicación local es preparada junto con esta respuesta, y el resguardo del cliente ajusta su
+resguardo de servidor acompañante al que se encuentra en la ubicación actual del objeto.
+Existe un intercambio entre el envío de una respuesta de manera directa a la inicialización del
+resguardo del cliente, o lo largo de la ruta inversa de los apuntadores hacia adelante. En el caso anterior, la comunicación es más rápida debido a que se necesita pasar por menos procesos. Por otro lado, solamente se puede ajustar el resguardo inicial del cliente, mientras que el envío de la respuesta
+junto con la ruta inversa permite un ajuste de todos los resguardos intermedios.
+Cuando un resguardo del servidor ya no es referido por cliente alguno, es posible eliminarlo.
+Por sí mismo, esto está muy relacionado con el recolector distribuido de basura, un problema lejos
+de lo trivial que por lo pronto no veremos aquí. Al lector interesado le recomendamos consultar
+Abdullahi y Ringwood (1998), Plainfosse y Shapiro (1995), y Veiga y Ferreira (2005).
+Ahora suponga que el proceso P1 de la figura 5-1 pasa su referencia al objeto O para efectuar
+el proceso P2. El paso por referencia se lleva a cabo mediante la instalación de una copia p del resguardo de cliente p en el espacio de dirección del proceso P2. El resguardo de cliente p hace referencia al mismo resguardo del servidor que p, de modo que el mecanismo de invocación hacia
+adelante trabaja igual que antes.
+Los problemas surgen cuando un proceso en la cadena de pares (resguardo del cliente, resguardo
+del servidor) se arruina o, de algún modo, se vuelve inalcanzable. Muchas soluciones son posibles.
+Una posibilidad, como la seguida en Emerald (Jul y cols., 1988) y en el sistema LII (Black y Artsy,
+1990), es dejar que la máquina en donde se creó el objeto (llamada ubicación de origen del objeto)
+mantenga siempre una referencia hacia su ubicación actual. Esta referencia se almacena y mantiene en una forma de tolerancia a fallas. Cuando se rompe una cadena, se le pregunta a la ubicación
+de origen del objeto en dónde se encuentra entonces el objeto. Para permitir que la ubicación de origen de un objeto cambie, es posible utilizar un servicio de nombres tradicional para registrar la ubicación de origen actual. A continuación explicaremos estos métodos basados en el origen.
+5.2.2 Métodos basados en el origen
+El uso de transmisión en los apuntadores hacia adelante establece problemas de escalabilidad. La
+transmisión y la multitransmisión son difíciles de implementar en redes a gran escala en donde
+grandes cadenas de apuntadores hacia adelante generan problemas de rendimiento y son susceptibles al rompimiento de los vínculos.
+Un método popular usado para soportar entidades móviles dentro de redes a gran escala es
+introducir la ubicación de origen, la cual mantiene el registro de la ubicación actual de una entidad. Se pueden emplear técnicas especiales para salvaguarda por fallas de proceso o de red. En
+la práctica, con frecuencia se elige la ubicación de origen para que sea el lugar donde la entidad
+fue creada.
+El método basado en el origen se utiliza como un mecanismo para servicios de ubicación con
+respecto a los apuntadores hacia adelante, según explicamos anteriormente. Otro ejemplo en donde
+se sigue el método basado en el origen es en las IP móviles (Johnson y cols., 2004), el cual explicamos brevemente en el capítulo 3. Cada servidor móvil utiliza una dirección fija de IP. Toda la
+comunicación con dicha dirección IP se direcciona inicialmente a los servidores móviles del agente de origen. Este agente de origen se localiza en la red de área global que corresponde a la dirección de red contenida en la dirección IP de los servidores móviles. En el caso de IPv6, se representa
+como un componente de la capa de red. Cada vez que el servidor móvil se mueve hacia otra red,
+solicita una dirección temporal que podemos utilizar para comunicación. Esta dirección añadida
+cuidadosamente se registra en el agente de origen Cuando el agente de origen recibe un paquete para el servidor móvil, busca la ubicación actual
+del cliente. Si el servidor se encuentra en la red local, el paquete simplemente se reenvía. De lo contrario, se entuba en la ubicación actual del cliente, esto es, se enmascara como dato en un paquete
+IP y se envía a la dirección añadida cuidadosamente. Al mismo tiempo, al emisor del paquete se le
+informa de la ubicación del servidor. La figura 5-3 también ilustra otra desventaja de los métodos basados en el origen en redes de
+gran escala. Para comunicarse con una entidad móvil, un cliente debe hacer primero contacto con
+el origen, el cual pudiera estar en una ubicación completamente diferente a la propia entidad. El resultado es un incremento en la latencia de comunicación.
+Una desventaja del método basado en el origen, es el uso de una ubicación de origen fija. Por
+alguna razón, se debe asegurar que la ubicación de origen exista siempre. De lo contrario, será
+imposible contactar a la entidad. Los problemas se agravan cuando una entidad de vida larga
+decide moverse de manera permanente hacia una parte completamente diferente de la red que
+donde está localizado su origen. En ese caso, sería mejor que el origen se mueva junto con el
+servidor.
+Una solución a este problema es registrar el origen de un servicio de nombres tradicional y
+permitir a un cliente buscar primero la ubicación del origen. Debido a que podemos asumir la ubicación de origen como relativamente estable, se le puede aplicar un caché después de haberla
+buscado Tablas Hash distribuidas
+Ahora demos un vistazo a desarrollos recientes para resolver un identificador para la dirección de la
+entidad asociada. Ya mencionamos en varias ocasiones las tablas Hash distribuidas, pero hemos diferido la explicación sobre la manera en que realmente trabajan. En este apartado corregiremos esta
+situación considerando primero el sistema de cuerdas como un sencillo sistema DHT fácil de explicar. En su forma más simple, los sistemas basados en DHT no consideran la proximidad de redes
+en lo absoluto. Esta negligencia pudiera provocar problemas de rendimiento. También explicaremos
+las soluciones apropiadas para sistemas predispuestos para una red.
+Funcionamiento general
+Existen distintos sistemas basados en DHT, acerca de los cuales aparece una breve explicación en
+Balakrishnan y colaboradores (2003). El sistema de cuerdas (Stoica y cols., 2003) representa a muchos sistemas DHT, aunque existen diferencias sutiles pero importantes que influencian su complejidad para los protocolos de administración y búsqueda. Como explicamos brevemente en el
+capítulo 2. El sistema de cuerdas utiliza un identificador de m bits de espacios para asignar los identificadores de manera aleatoria hacia los nodos, así como las llaves para especificar las entidades.
+Estas últimas pueden ser virtualmente cualquier cosa: archivos, procesos, etc. El número m de bits
+por lo general es de 128 o 160, dependiendo de cuál función hash se utilice. Una entidad con llave
+k entra en la jurisdicción del nodo que tiene el identificador más pequeño id  k. A este nodo lo conocemos como el sucesor de k, y se representa como succ(k).
+En los sistemas basados en DHT, la cuestión principal es resolver de manera eficiente una llave
+k para la dirección de succ(k). Un método evidente no escalable es dejar que cada nodo p mantenga
+el registro del sucesor succ(p  1) así como el de su predecesor pred(p). En ese caso, cada vez que
+un nodo p reciba una petición para resolver la llave k, simplemente reenviará la petición a uno de
+sus vecinos (el que resulte apropiado) a menos que pred(p)  k  p, en cuyo caso el nodo p debe
+devolver su propia dirección hacia el proceso que inició la resolución de la llave k.
+En lugar de este método lineal basado en la búsqueda de la llave, cada nodo de cuerdas mantiene una tabla finger para la mayoría de las entradas m. Si FTp denota la tabla finger del nodo p,
+entonces
+FTp[i]  succ(p  2i1
+)
+Puesto en otras palabras, los i-ésimos puntos de entrada al primer nodo suceden a p en por lo menos 2i1
+. Observemos que estas referencias son en realidad un atajo hacia los nodos existentes en
+el espacio del identificador i, en donde la distancia reducida desde el nodo p se incrementa de manera exponencial conforme se incrementa el índice en la tabla finger. Para efectuar una búsqueda
+de la llave k, el nodo p reenviará entonces la petición de inmediato al nodo q cuyo índice es j en la
+tabla finger de p, en donde:
+q  FTp[j]  k  FTp[j  1]
+(Para mayor claridad, ignoraremos el módulo aritmético.)
+
+Para ilustrar esta búsqueda, solucione el caso para k  26 del nodo 1 como aparece en la figura 5-4. Primero, el nodo 1 buscará k  26 dentro de su tabla finger para descubrir que este valor es
+mayor que FT1[5], lo cual significa que la petición se envía al nodo 18  FT1[5]. El nodo 18, a su
+vez, seleccionará al nodo 20, conforme FT18[2]  k  FT18[3]. Por último, la petición es enviada
+desde el nodo 20 al nodo 21 y de ahí al nodo 28, el cual es responsable de k  26. En ese punto, la
+dirección del nodo 28 se devuelve al nodo 1 y la llave se resuelve. Por razones similares, cuando se
+le pide al nodo 28 que resuelva la llave k  12, la petición será enrutada como podemos ver en la
+línea discontinua de la figura 5-4. Podemos mostrar que la búsqueda requiere, por lo general,
+O(log(N)) pasos, donde N es el número de nodos presentes en el sistema.
+
+En sistemas distribuidos grandes podemos esperar que la colección de nodos participantes cambie todo el tiempo. No solamente los nodos entrarán y saldrán de manera voluntaria, necesitamos
+también considerar el caso de nodos que fallan (y de esta manera abandonan efectivamente el sistema), para luego recuperarse nuevamente (en cuyo punto vuelven a entrar)
+
+Unirse a un sistema basado en DHT es relativamente simple, tal como en el sistema de cuerdas. Suponga que el nodo p desea unirse. Simplemente hace contacto con un nodo arbitrario en el
+sistema existente y solicita una búsqueda para succ(p  1). Una vez identificado este nodo, p puede insertarse a sí misma dentro del anillo. De manera similar, abandonar puede ser igual de simple.
+Observe que los nodos también mantienen un registro de su predecesor.
+Desde luego, la complejidad proviene de mantener las tablas finger actualizadas. Más importante es que para cada nodo q, FTq[1] es correcto dado que esta entrada hace referencia al siguiente
+nodo presente en el anillo, esto es, el sucesor de q  1. Con el objeto de lograr esta meta, por lo
+general, cada nodo q ejecuta un sencillo procedimiento que hace contacto con succ(q  1) y hace la
+petición de devolver pred(succ(q  1)). Si q  pred(succ(q  1)), entonces q sabe que su información es consistente con la de su sucesor. De lo contrario, si el sucesor de q actualiza a su predecesor, entonces, de manera aparente, un nuevo nodo p entra al sistema, con q  p  succ(q  1), de
+modo que q ajustará FTq[1] para p. En ese punto, también verificará si p registra a q como su predecesor. Si no, se requiere otro ajuste de FTq[1].
+De manera similar, para actualizar una tabla finger, el nodo q solamente necesita encontrar al
+sucesor de k  q  2i  1 para cada entrada i. De nuevo, esto se puede hacer al lanzar una petición
+para resolver succ(k). En el sistema de cuerdas, dichas peticiones se lanzan de manera regular por
+medio de un proceso localizado en segundo plano.
+De igual modo, cada nodo q verificará regularmente si su predecesor está vivo. Si el predecesor falla, la única cosa que puede registrar q es el hecho de configurar pred(q) a “desconocido”. Por
+otro lado, cuando el nodo q actualice su vínculo al siguiente nodo conocido en el anillo, y se dé
+cuenta de que el predecesor de succ(q  1) se estableció como “desconocido”, simplemente notificará a succ(q  1) que sospecha que es el predecesor. Por tanto, estos sencillos procedimientos
+aseguran que un sistema de cuerdas es por lo general consistente, con excepción quizá de sólo unos
+cuantos nodos. Podemos encontrar los detalles en Stoica y colaboradores (2003). 
+Exploración de la proximidad en red
+Uno de los potenciales problemas con sistemas tales como el de cuerdas es que las peticiones se
+pueden rutear de manera errática por toda la internet. Por ejemplo, asuma que el nodo 1 de la figura 5-4 se ubica en Amsterdam, Holanda; el nodo 18 en San Diego, California; el nodo 20 de nuevo
+en Amsterdam; y el nodo 21 en San Diego. Entonces, el resultado de resolver la llave 26 incurrirá
+en la transferencia de tres mensajes de área amplia que podríamos argumentar se redujeron cuando
+mucho a uno. Para minimizar estos casos patológicos, el diseño de un sistema basado en DHT requiere tomar en cuenta la red subyacente.
+Castro y colaboradores (2002b) distinguen tres diferentes formas de hacer un sistema basado
+en DHT consciente de la red subyacente. En el caso de la asignación de nodos basados en la topología, la idea es asignar identificadores de tal modo que dos nodos próximos tengan identificadores
+que también se encuentren cercanos entre sí. No es difícil imaginar que este método puede imponer
+problemas severos en el caso de sistemas relativamente sencillos tales como el de cuerdas. Cuando
+los identificadores se ejemplifican desde un espacio unidimensional, mapear un anillo lógico en internet está lejos de lo trivial. Más aún, dicho mapeo puede fácilmente exponer fallas correlacionadas: los nodos presentes en la misma red corporativa tendrán identificadores a partir de un intervalo relativamente pequeño. Cuando esa red se vuelve inalcanzable, tenemos repentinamente un hueco
+en la distribución alternativa uniforme de identificadores.
+Con el ruteo por proximidad, los nodos mantienen una lista de alternativas para reenviar una
+petición. Por ejemplo, en lugar de tener solamente un sucesor, cada nodo en el sistema de cuerdas
+pudiera de igual manera mantener el registro de los sucesores de r. De hecho, esta redundancia
+se puede aplicar para cada entrada dentro de una tabla finger. Para el nodo p, los puntos FTp[i] hacia
+el primer nodo en el rango [p  2i  1
+, p  2i  1]. No existe razón alguna por la que p no pueda
+mantener un registro de los nodos r en dicho rango: si es necesario, cada uno de tales nodos se
+puede utilizar para rutear una petición de búsqueda para una llave k  p  2i  1. En ese caso, al
+elegir el reenvío de una petición de búsqueda, un nodo puede recolectar uno de los sucesores de r
+que se encuentre cerca de sí mismo, pero además satisface la restricción de que el identificador del
+nodo elegido debe ser más pequeño que el propuesto por la llave solicitada. Una ventaja adicional
+de tener sucesores múltiples para cada entrada de la tabla es que las fallas presentes en los nodos
+no necesariamente necesitan llevar las fallas de las búsquedas, como rutas múltiples que se pueden
+explorar.
+Por último, en la selección de proximidad del vecino la idea es optimizar las tablas de ruteo
+en tal forma que el nodo más cercano se seleccione como vecino. Esta selección trabaja solamente
+cuando existen más nodos de dónde elegir. En un sistema cuerdas, por lo general, no es el caso. Sin
+embargo, en otros protocolos tales como Pastry (Rowstron y Druschel, 2001), cuando un nodo se
+integra recibe la información con respecto al recubrimiento actual desde otros nodos múltiples.
+Esta información se utiliza mediante un nuevo nodo para construir una tabla de ruteo. Desde luego,
+cuando existen nodos alternativos entre los cuales elegir, la selección de proximidad del vecino
+permitirá que el nodo elegido para integrar sea el mejor.
+Observemos que pudiera no ser tan fácil trazar una línea entre la proximidad de ruteo y la selección de proximidad del vecino. De hecho, cuando se modifica el sistema cuerdas para incluir
+sucesores de r para cada entrada de la tabla finger, se recurre a la selección de proximidad del vecino para identificar a los vecinos r más cercanos, los cuales están muy cerca del ruteo por proximidad como ya explicamos (Dabek y cols., 2004b).
+Para terminar, vemos también que se puede hacer una distinción entre iterativo y búsqueda
+recursiva. En el caso anterior, un nodo al cual se solicita la búsqueda de una llave devolverá la
+dirección de red del siguiente nodo encontrado para el proceso que hace la petición. Entonces, el
+proceso solicitará que el siguiente nodo lleve a cabo otro paso para resolver la llave. Una alternativa,
+y esencialmente la forma que ya explicamos, es permitir que un nodo reenvíe una petición de búsqueda al siguiente nodo. Ambos métodos tienen sus ventajas y desventajas, las cuales explicaremos
+más adelante en este capítulo.
+5.2.4 Métodos jerárquicos
+En esta sección explicaremos primero un método general para trazar un esquema de ubicación jerárquica, después del cual presentaremos un número de optimizaciones. El método que presentamos
+está basado en el servicio de localización Globe, descrito con detalles en Ballintijn (2003). Podemos encontrar una revisión en Van Steen y colaboradores (1998b). Éste es un servicio general de ubicación representativo de muchos servicios de ubicación jerárquicos propuestos para lo que denominamos sistemas de comunicación personal, de los cuales podemos encontrar una revisión
+general en Pitoura y Samaras (2001).
+En un sistema jerárquico, una red está dividida en una colección de dominios. Existe un solo
+dominio de nivel superior que se expande por toda la red. Cada dominio se puede subdividir en múltiples subdominios más pequeños. Un dominio de nivel muy bajo, llamado dominio hoja, por lo
+general corresponde a una red de área local ubicada en una red de computadoras o una célula de red
+de telefonía móvil.
+Cada dominio D tiene un nodo de directorio asociado dir(D) que mantiene el registro de las
+entidades en cada dominio. Esto genera un árbol de nodos de directorio. El nodo de directorio del
+dominio de nivel superior, llamado nodo raíz (directorio), sabe acerca de todas las entidades.
+
+Para mantener un registro con respecto a los pormenores de una entidad, cada entidad en
+curso está localizada dentro de un dominio D representado por un directorio de ubicación dentro del nodo directorio dir(D). Un registro de localización para una entidad E en el nodo de
+directorio N para un dominio D contiene la dirección actual de una entidad dentro de dicho dominio.
+Por el contrario, el nodo directorio N para el siguiente dominio de más alto nivel D que contiene a D, tendrá el registro de localización para E que contiene solamente un apuntador a N. De
+manera similar, el nodo padre de N almacenará un registro de localización para E que contiene
+sólo un apuntador a N. Por consecuencia, el nodo raíz tendrá un registro de localización para
+cada entidad, en donde cada registro de localización almacena un apuntador al nodo de directorio del siguiente subdominio de más bajo nivel en que se ubica actualmente la entidad asociada
+al registro.
+Una entidad puede contener múltiples direcciones, por ejemplo, si se replica. Si una entidad
+tiene una dirección y un dominio hoja D1 y D2, respectivamente, entonces el nodo de directorio del
+dominio más pequeño contiene tanto a D1 como a D2, tendremos dos apuntadores, uno por cada subdominio que contiene una dirección. Esto produce la organización general del árbol.
+Consideremos ahora la manera en que una operación de búsqueda se ejecuta en dicho servicio
+de ubicación. Como podemos ver en la figura 5-7, un cliente que desea localizar una entidad E lanza
+una petición de búsqueda al nodo de directorio localizado en el dominio hoja D en el cual reside el
+cliente. Si el nodo de directorio no almacena un registro de ubicación para la entidad, entonces la
+entidad no se localiza en D. En consecuencia, el nodo reenvía la petición a su padre. Observe que
+el nodo padre representa un dominio más grade que su hijo. Si el padre tampoco tiene un registro
+en E, la petición de búsqueda se reenvía al siguiente nivel más alto, y así sucesivamente.
+Tan pronto como la petición alcanza un nodo de directorio M que almacena el registro de ubicación para la entidad E, sabemos que E se encuentra en alguna parte del dominio dom(M) representado por el nodo M. En la figura 5-7, M se muestra para almacenar el registro de la ubicación
+que contiene un apuntador a uno de sus subdominios. Entonces, la petición de búsqueda se
+reenvía al nodo de directorio de dicho subdominio, el cual a cambio lo reenvía hacia abajo en el
+árbol hasta que finalmente la petición alcanza una hoja del árbol. El registro de ubicación almacenado en la hoja del árbol en el nodo hoja contendrá la dirección de E en el dominio hoja.
+Entonces, esta dirección puede devolverse al cliente que inicialmente solicitó la búsqueda que se
+llevará a cabo.
+Una observación importante con respecto a los servicios de ubicación jerárquica es que la operación de búsqueda hace la exploración de manera local. En principio, la búsqueda de la entidad se
+efectúa incrementando gradualmente el anillo centrado alrededor del cliente sujeto a petición. El
+área de búsqueda se expande cada vez que la petición se reenvía a la dirección de más alto nivel
+del nodo de directorio. En el peor de los casos, la búsqueda continúa hasta que la petición alcanza
+el nodo raíz. Debido a que el nodo raíz contiene un registro de ubicación para cada entidad, entonces
+la petición puede simplemente reenviarse a lo largo de una ruta descendente de apuntadores hacia
+uno de los nodos hoja.
+Las operaciones de actualización se realizan similarmente de manera local, tal como ilustra la
+figura 5-8. Considere una entidad E que crea una réplica en el dominio hoja D para el cual se necesita insertar su dirección. La inserción se inicia en el nodo hoja dir(D) de D el cual reenvía de
+inmediato la petición insertada a su padre. El padre reenviará también la petición de inserción, hasta
+que alcance un nodo de directorio M que de antemano almacena un registro de ubicación para E.
+El nodo M almacenará entonces un apuntador en el registro de localización para E, haciendo
+referencia al nodo desde el cual fue reenviada la petición de inserción. En ese punto, el nodo hijo
+crea un registro de localización para E que contiene un apuntador al siguiente nodo de más bajo
+nivel desde donde proviene la petición. Este proceso continúa hasta que alcancemos el nodo hoja
+desde donde inició la inserción. El nodo hoja, finalmente, crea un registro con la dirección de la
+entidad en el dominio hoja asociado.
+
+nsertar una dirección tal y como se describió permite la instalación de la cadena de apuntadores en una modalidad arriba-abajo comenzando en el nodo directorio de menor nivel que
+tenga un registro de ubicación para la entidad E. Una alternativa es crear un registro de ubicación antes de pasar la petición inserción al nodo padre. En otras palabras, la cadena de apuntadores se construye de abajo hacia arriba. La ventaja de lo anterior es que una dirección queda
+disponible para búsquedas lo más pronto posible. Por consecuencia, si un nodo padre es temporalmente inalcanzable, la dirección puede buscarse aún dentro del dominio representado por el
+nodo actual.
+Una operación de eliminación es análoga a una operación de inserción. Cuando necesitamos
+remover una dirección para la entidad E en el dominio hoja D, se le solicita al nodo de directorio
+dir(D) que remueva dicha dirección desde su registro de ubicación para E. Si dicho registro de
+localización llega a quedarse vacío, es decir, que no contenga ninguna otra dirección para E en D,
+se puede remover. En tal caso, el nodo padre de dir(D) desea remover su apuntador hacia dir(D). Si
+registro de localización para E en el padre se queda vacío, igualmente se debe remover y el siguiente
+nodo de directorio de más alto nivel debería ser informado. De nuevo, este proceso continúa hasta
+que se remueve un apuntador desde un registro de localización que permanece no vacío posteriormente o hasta que se alcanza la raíz.
+
+
